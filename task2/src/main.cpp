@@ -70,6 +70,7 @@ const char *getModeText(ControlMode mode) {
 }
 
 void setRelay(bool enabled) {
+  // Persist software state and drive physical relay pin together.
   relayEnabled = enabled;
   digitalWrite(RELAY_PIN, enabled ? RELAY_ACTIVE_STATE : RELAY_INACTIVE_STATE);
 }
@@ -123,6 +124,7 @@ void printSystemState() {
 }
 
 void handleRelayCommand(const String &command) {
+  // Accept common command aliases from dashboard or manual MQTT publish.
   if (command == "ON" || command == "1" || command == "TRUE") {
     controlMode = MODE_FORCE_ON;
   } else if (command == "OFF" || command == "0" || command == "FALSE") {
@@ -142,6 +144,7 @@ void handleRelayCommand(const String &command) {
 
 // Handles subscribed MQTT commands.
 void mqttCallback(char *topic, byte *payload, unsigned int length) {
+  // Build command string from raw MQTT payload bytes.
   String message;
   message.reserve(length);
 
@@ -168,6 +171,7 @@ void connectWiFi() {
     return;
   }
 
+  // Blocking reconnect keeps security logic deterministic for this project.
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
@@ -184,6 +188,7 @@ void connectWiFi() {
 
 // Blocking MQTT reconnect loop and re-subscribe.
 void connectMqtt() {
+  // Reconnect loop also re-subscribes command topic after broker reconnect.
   while (!mqttClient.connected()) {
     Serial.print("Connecting to MQTT broker...");
 
@@ -217,6 +222,7 @@ void setup() {
 
   connectWiFi();
 
+  // Configure broker endpoint and incoming message handler.
   mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
   mqttClient.setCallback(mqttCallback);
 
@@ -235,6 +241,7 @@ void loop() {
     connectMqtt();
   }
 
+  // Required to process incoming MQTT packets and keep connection alive.
   mqttClient.loop();
 
   // Ignore PIR during warm-up window to reduce false triggers.

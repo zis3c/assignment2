@@ -67,6 +67,7 @@ bool syncClock() {
 }
 
 bool influxConfigReady() {
+  // Prevent accidental writes when placeholder values are still in use.
   return strcmp(INFLUXDB_URL, "http://YOUR_INFLUXDB_HOST:8086") != 0 &&
          strcmp(INFLUXDB_TOKEN, "YOUR_INFLUXDB_TOKEN") != 0 &&
          strcmp(INFLUXDB_ORG, "YOUR_INFLUXDB_ORG") != 0 &&
@@ -74,10 +75,12 @@ bool influxConfigReady() {
 }
 
 void setLedState(float tempC) {
+  // Clear all LEDs first, then assert exactly one state LED.
   digitalWrite(GREEN_LED_PIN, LOW);
   digitalWrite(YELLOW_LED_PIN, LOW);
   digitalWrite(RED_LED_PIN, LOW);
 
+  // Demo-tuned thresholds for easier visible color transitions.
   if (tempC <= 28.0f) {
     digitalWrite(GREEN_LED_PIN, HIGH);
   } else if (tempC > 28.0f && tempC < 29.0f) {
@@ -88,6 +91,7 @@ void setLedState(float tempC) {
 }
 
 void drawOled(float tempC, float hum) {
+  // Refresh the full OLED frame with latest telemetry values.
   display.clearDisplay();
   display.setTextColor(SSD1306_WHITE);
   display.setTextSize(1);
@@ -104,6 +108,7 @@ void drawOled(float tempC, float hum) {
 }
 
 void connectWifi() {
+  // Blocking connect keeps networking simple for this assignment prototype.
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Connecting WiFi");
@@ -138,6 +143,7 @@ void setup() {
   dht.begin();
   connectWifi();
 
+  // Clock sync is required so InfluxDB points get valid timestamps.
   syncClock();
 
   if (influxClient.validateConnection()) {
@@ -157,10 +163,12 @@ void setup() {
 }
 
 void loop() {
+  // Recover Wi-Fi automatically if link drops.
   if (WiFi.status() != WL_CONNECTED) {
     connectWifi();
   }
 
+  // Fixed-rate sampling loop.
   if (millis() - lastSampleMs < SENSOR_PERIOD_MS) {
     delay(20);
     return;
@@ -171,6 +179,7 @@ void loop() {
   float temperatureC = dht.readTemperature();
 
   if (isnan(humidity) || isnan(temperatureC)) {
+    // Skip publish/display updates when sensor frame is invalid.
     Serial.println("DHT read failed");
     return;
   }
@@ -179,12 +188,14 @@ void loop() {
   drawOled(temperatureC, humidity);
 
   if (influxConfigReady()) {
+    // Write one telemetry point per sample period.
     telemetryPoint.clearFields();
     telemetryPoint.addField("temperature_c", temperatureC);
     telemetryPoint.addField("humidity_pct", humidity);
 
     if (!influxClient.writePoint(telemetryPoint)) {
       String err = influxClient.getLastErrorMessage();
+      // Lightweight retry for transient network timeouts.
       if (err.indexOf("Timeout") >= 0) {
         delay(300);
         if (influxClient.writePoint(telemetryPoint)) {
