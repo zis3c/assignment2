@@ -67,7 +67,8 @@ bool syncClock() {
 }
 
 bool influxConfigReady() {
-  return strcmp(INFLUXDB_TOKEN, "YOUR_INFLUXDB_TOKEN") != 0 &&
+  return strcmp(INFLUXDB_URL, "http://YOUR_INFLUXDB_HOST:8086") != 0 &&
+         strcmp(INFLUXDB_TOKEN, "YOUR_INFLUXDB_TOKEN") != 0 &&
          strcmp(INFLUXDB_ORG, "YOUR_INFLUXDB_ORG") != 0 &&
          strcmp(INFLUXDB_BUCKET, "YOUR_INFLUXDB_BUCKET") != 0;
 }

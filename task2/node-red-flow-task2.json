@@ -1,0 +1,212 @@
+[
+    {
+        "id":  "b8f0ac7215a9d4a1",
+        "type":  "tab",
+        "label":  "Smart Security Task 2",
+        "disabled":  false,
+        "info":  "PIR + Relay + MQTT dashboard"
+    },
+    {
+        "id":  "cf1266302524c2da",
+        "type":  "mqtt-broker",
+        "name":  "VPS MQTT",
+        "broker":  "YOUR_MQTT_BROKER_HOST",
+        "port":  "1883",
+        "clientid":  "",
+        "autoConnect":  true,
+        "usetls":  false,
+        "protocolVersion":  "4",
+        "keepalive":  "60",
+        "cleansession":  true,
+        "autoUnsubscribe":  true,
+        "birthTopic":  "",
+        "birthQos":  "0",
+        "birthRetain":  "false",
+        "birthPayload":  "",
+        "closeTopic":  "",
+        "closeQos":  "0",
+        "closeRetain":  "false",
+        "closePayload":  "",
+        "willTopic":  "",
+        "willQos":  "0",
+        "willRetain":  "false",
+        "willPayload":  ""
+    },
+    {
+        "id":  "02c1eb3ea36879b7",
+        "type":  "ui_tab",
+        "name":  "Smart Security",
+        "icon":  "dashboard",
+        "disabled":  false,
+        "hidden":  false
+    },
+    {
+        "id":  "53adf45f75387fd8",
+        "type":  "ui_group",
+        "name":  "Alarm Control",
+        "tab":  "02c1eb3ea36879b7",
+        "order":  1,
+        "disp":  true,
+        "width":  "6",
+        "collapse":  false,
+        "className":  ""
+    },
+    {
+        "id":  "18f7bb56cc5d32bf",
+        "type":  "mqtt in",
+        "z":  "b8f0ac7215a9d4a1",
+        "name":  "Motion Status",
+        "topic":  "iot/security/motion/status",
+        "qos":  "0",
+        "datatype":  "auto",
+        "broker":  "cf1266302524c2da",
+        "nl":  false,
+        "rap":  true,
+        "rh":  0,
+        "inputs":  0,
+        "x":  130,
+        "y":  100,
+        "wires":  [
+                      [
+                          "4dbfe89ea7f8ed90"
+                      ]
+                  ]
+    },
+    {
+        "id":  "4dbfe89ea7f8ed90",
+        "type":  "ui_text",
+        "z":  "b8f0ac7215a9d4a1",
+        "group":  "53adf45f75387fd8",
+        "order":  1,
+        "width":  "6",
+        "height":  "1",
+        "name":  "Current Status",
+        "label":  "Area Status",
+        "format":  "{{msg.payload}}",
+        "layout":  "row-spread",
+        "className":  "",
+        "x":  390,
+        "y":  100,
+        "wires":  [
+
+                  ]
+    },
+    {
+        "id":  "a9fa2de54380f5dc",
+        "type":  "ui_switch",
+        "z":  "b8f0ac7215a9d4a1",
+        "name":  "Manual Relay",
+        "label":  "Manual Override Relay",
+        "tooltip":  "ON sends ON, OFF sends OFF",
+        "group":  "53adf45f75387fd8",
+        "order":  2,
+        "width":  "6",
+        "height":  "1",
+        "passthru":  false,
+        "decouple":  "true",
+        "topic":  "",
+        "topicType":  "str",
+        "style":  "",
+        "onvalue":  "ON",
+        "onvalueType":  "str",
+        "onicon":  "",
+        "oncolor":  "",
+        "offvalue":  "OFF",
+        "offvalueType":  "str",
+        "officon":  "",
+        "offcolor":  "",
+        "animate":  false,
+        "className":  "",
+        "x":  150,
+        "y":  180,
+        "wires":  [
+                      [
+                          "934f0a25e814ca96"
+                      ]
+                  ]
+    },
+    {
+        "id":  "934f0a25e814ca96",
+        "type":  "mqtt out",
+        "z":  "b8f0ac7215a9d4a1",
+        "name":  "Relay Command",
+        "topic":  "iot/security/relay/set",
+        "qos":  "0",
+        "retain":  "true",
+        "respTopic":  "",
+        "contentType":  "",
+        "userProps":  "",
+        "correl":  "",
+        "expiry":  "",
+        "broker":  "cf1266302524c2da",
+        "x":  400,
+        "y":  180,
+        "wires":  [
+
+                  ]
+    },
+    {
+        "id":  "2c757756fe2c5f84",
+        "type":  "inject",
+        "z":  "b8f0ac7215a9d4a1",
+        "name":  "Set AUTO",
+        "props":  [
+                      {
+                          "p":  "payload"
+                      }
+                  ],
+        "repeat":  "",
+        "crontab":  "",
+        "once":  false,
+        "onceDelay":  "0.1",
+        "topic":  "",
+        "payload":  "AUTO",
+        "payloadType":  "str",
+        "x":  120,
+        "y":  240,
+        "wires":  [
+                      [
+                          "934f0a25e814ca96"
+                      ]
+                  ]
+    },
+    {
+        "id":  "0b6ac4f286f0487f",
+        "type":  "mqtt in",
+        "z":  "b8f0ac7215a9d4a1",
+        "name":  "Relay State",
+        "topic":  "iot/security/relay/state",
+        "qos":  "0",
+        "datatype":  "auto",
+        "broker":  "cf1266302524c2da",
+        "nl":  false,
+        "rap":  true,
+        "rh":  0,
+        "inputs":  0,
+        "x":  110,
+        "y":  300,
+        "wires":  [
+                      "9a4556dbef2d8fdc",
+                      "a9fa2de54380f5dc"
+                  ]
+    },
+    {
+        "id":  "9a4556dbef2d8fdc",
+        "type":  "ui_text",
+        "z":  "b8f0ac7215a9d4a1",
+        "group":  "53adf45f75387fd8",
+        "order":  3,
+        "width":  "6",
+        "height":  "1",
+        "name":  "Relay State",
+        "label":  "Relay",
+        "format":  "{{msg.payload}}",
+        "layout":  "row-spread",
+        "className":  "",
+        "x":  360,
+        "y":  300,
+        "wires":  [
+
+                  ]
+    }
+]
